@@ -8,7 +8,7 @@ public class RubyController : MonoBehaviour
 {
     // Health Variables
     public int maxHealth = 5;
-    public int health { get { return currentHealth; }}
+    public int health { get { return currentHealth; } }
     int currentHealth;
 
     // Invincibility Timer
@@ -16,9 +16,20 @@ public class RubyController : MonoBehaviour
     bool isInvincible;
     float invincibleTimer;
 
+    // Speed Boost Timer
+    public float timeBoosting = 4.0f;
+    float speedBoostTimer;
+    bool isBoosting;
+
+    //slow timer
+    public float timeSlowing = 5.0f;
+    float speedSlowTimer;
+    bool isSlowing;
+
+
     // Cog Object and Ammo Variables
     public GameObject projectilePrefab;
-    public int ammo { get { return currentAmmo; }}
+    public int ammo { get { return currentAmmo; } }
     public int currentAmmo;
 
     // Ammo Text UI
@@ -26,13 +37,13 @@ public class RubyController : MonoBehaviour
 
     // Ruby Variables
     Rigidbody2D rigidbody2d;
-    float horizontal; 
+    float horizontal;
     float vertical;
     public float speed = 5.0f;
 
     // Animator
     Animator animator;
-    Vector2 lookDirection = new Vector2(1,0);
+    Vector2 lookDirection = new Vector2(1, 0);
 
     // Audio Source Variables
     AudioSource audioSource;
@@ -99,13 +110,13 @@ public class RubyController : MonoBehaviour
 
         // Animation and Flip
         Vector2 move = new Vector2(horizontal, vertical);
-        
-        if(!Mathf.Approximately(move.x, 0.0f) || !Mathf.Approximately(move.y, 0.0f))
+
+        if (!Mathf.Approximately(move.x, 0.0f) || !Mathf.Approximately(move.y, 0.0f))
         {
             lookDirection.Set(move.x, move.y);
             lookDirection.Normalize();
         }
-        
+
         animator.SetFloat("Look X", lookDirection.x);
         animator.SetFloat("Look Y", lookDirection.y);
         animator.SetFloat("Speed", move.magnitude);
@@ -118,11 +129,38 @@ public class RubyController : MonoBehaviour
                 isInvincible = false;
         }
 
+        // Speed Boost Timer
+        if (isBoosting == true)
+        {
+            speedBoostTimer -= Time.deltaTime; // Once speed boost activates, it counts down
+            speed = 8;
+
+            if (speedBoostTimer < 0)
+            {
+                isBoosting = false;
+                speed = 5;
+            }
+        }
+
+
+        // Speed Slow Timer
+        if (isSlowing == true)
+        {
+            speedSlowTimer -= Time.deltaTime; // Once speed boost activates, it counts down
+            speed = 1;
+
+            if (speedSlowTimer < 0)
+            {
+                isSlowing = false;
+                speed = 5;
+            }
+        }
+
         // Cog Bullet is launched - Ammo in UI is reduced
-        if(Input.GetKeyDown(KeyCode.C))
+        if (Input.GetKeyDown(KeyCode.C))
         {
             Launch();
-            
+
             if (currentAmmo > 0)
             {
                 ChangeAmmo(-1);
@@ -147,7 +185,7 @@ public class RubyController : MonoBehaviour
 
                     else
                     {
-                       character.DisplayDialog(); 
+                        character.DisplayDialog();
                     }
                 }
             }
@@ -165,7 +203,7 @@ public class RubyController : MonoBehaviour
             if (gameOver == true)
             {
                 // this loads the currently active scene
-              SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+                SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
             }
 
             if (winGame == true)
@@ -193,10 +231,10 @@ public class RubyController : MonoBehaviour
         {
             if (isInvincible)
                 return;
-            
+
             isInvincible = true;
             invincibleTimer = timeInvincible;
-            
+
 
             PlaySound(hitSound);
 
@@ -297,6 +335,24 @@ public class RubyController : MonoBehaviour
             // Calls sound script and plays win sound
             SoundManagerScript.PlaySound("FFWin");
         }
-        
+
+    }
+
+    public void SpeedBoost(int amount)
+    {
+        if (amount > 0)
+        {
+            speedBoostTimer = timeBoosting;
+            isBoosting = true;
+        }
+    }
+
+    public void SpeedSlow(int amount)
+    {
+        if (amount > 0)
+        {
+            speedSlowTimer = timeSlowing;
+            isSlowing = true;
+        }
     }
 }
